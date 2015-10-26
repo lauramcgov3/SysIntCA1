@@ -23,7 +23,8 @@ int tsh_cd(char **args);
 int tsh_help(char **args);
 int tsh_exit(char **args);
 
-//List the internal commands, followed by a list of the functions to go with those commands.
+//List the internal commands, 
+//followed by a list of the functions to go with those commands.
 char *builtin_str[] = 
 {
     "cd",
@@ -200,7 +201,7 @@ char *tsh_readline(void)
 char **tsh_splitline (char *line)
 {
 
-    nt buffsize = TSH_TOK_BUFFSIZE, position = 0;
+    int buffsize = TSH_TOK_BUFFSIZE, position = 0;
     char **tokens = malloc(buffsize * sizeof(char*));
     char *token;
 
@@ -247,7 +248,7 @@ void tsh_loop(void)
     {
         printf("usr@customshell: "); 
         line = tsh_readline(); //Calls function to read the line
-        args = tsh_splitline(); //Calls function to split line into arguments
+        args = tsh_splitline(line); //Calls function to split line into arguments
         status = tsh_execute(args); //Execute arguements 
 
         // Free line and args
