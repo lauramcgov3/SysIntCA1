@@ -12,6 +12,7 @@ Date: 19th October 2015
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
@@ -21,9 +22,10 @@ Date: 19th October 2015
 
 //Function declarations for internal commands 
 int tsh_cd(char **args);
+int tsh_dt(char **args);
+int tsh_ud(char **args);
 int tsh_help(char **args);
 int tsh_exit(char **args);
-int tsh_dt(char **args);
 
 //List the internal commands, 
 //followed by a list of the functions to go with those commands.
@@ -31,7 +33,7 @@ char *builtin_str[] =
 {
     "cd",
     "dt",
-    //"ud",
+    "ud",
     "help",
     "exit"
 };
@@ -40,7 +42,7 @@ int (*builtin_func[]) (char **) =
 {
     &tsh_cd,
     &tsh_dt,
-    //&tsh_ud,
+    &tsh_ud,
     &tsh_help,
     &tsh_exit
 };
@@ -72,6 +74,38 @@ int tsh_cd(char **args)
 }
 
 
+//dt function
+int tsh_dt (char **args)
+{
+    char buff[100];
+    time_t now = time (0);
+    strftime (buff, 100, "%Y%m%d%H%M%S", localtime (&now));
+    printf ("%s\n", buff);
+    return 1;
+    
+}
+
+
+//ud function
+int tsh_ud (char **args)
+{
+    //Get user ID
+    int uid = getuid();
+    
+    //Get group ID
+    int gid = getgid();
+    
+    //Get current username
+    char *usrnm;
+    usrnm=(char *)malloc(10*sizeof(char));
+    usrnm=getlogin();
+    
+    printf("%i, %i, %s \n", uid, gid, usrnm);
+    
+    
+}
+
+
 //Help function
 int tsh_help(char **args)
 {
@@ -94,17 +128,6 @@ int tsh_help(char **args)
 int tsh_exit(char **args)
 {
     return 0;
-}
-
-int tsh_dt (char **args)
-{
-    char buff[100];
-    time_t now = time (0);
-    printf("%s\n", time_t);
-    strftime (buff, 100, "%Y%m%d%H%M%S", localtime (&now));
-    printf ("%s\n", buff);
-    return 1;
-    
 }
 
 
