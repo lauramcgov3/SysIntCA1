@@ -13,6 +13,8 @@ Date: 19th October 2015
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <grp.h>
+#include <sys/types.h>
 
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
@@ -89,7 +91,8 @@ int tsh_dt (char **args)
 //ud function
 int tsh_ud (char **args)
 {
-    //Get user ID
+    
+   //Get user ID
     int uid = getuid();
     
     //Get group ID
@@ -100,9 +103,24 @@ int tsh_ud (char **args)
     usrnm=(char *)malloc(10*sizeof(char));
     usrnm=getlogin();
     
-    printf("%i, %i, %s \n", uid, gid, usrnm);
+    //Get group name
+    char* name;
+	struct group* g;
+    char** p;
+
+    if( ( g = getgrgid( getgid() ) ) == NULL ) {
+      fprintf( stderr, "getgrgid: NULL pointer\n" );
+      return( EXIT_FAILURE );
+    }
+    name = g->gr_name;
+    for( p = g->gr_mem; *p != NULL; p++ ) {
+      printf( "\t%s\n", *p );
+    }
     
-    
+    //Print everything
+    printf("%i, %i, %s, %s. \n", uid, gid, usrnm, name);
+	
+	return 1;
 }
 
 
