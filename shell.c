@@ -11,6 +11,7 @@ Date: 19th October 2015
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
@@ -22,13 +23,14 @@ Date: 19th October 2015
 int tsh_cd(char **args);
 int tsh_help(char **args);
 int tsh_exit(char **args);
+int tsh_dt(char **args);
 
 //List the internal commands, 
 //followed by a list of the functions to go with those commands.
 char *builtin_str[] = 
 {
     "cd",
-    // "dt",
+    "dt",
     //"ud",
     "help",
     "exit"
@@ -37,7 +39,7 @@ char *builtin_str[] =
 int (*builtin_func[]) (char **) = 
 {
     &tsh_cd,
-    //&tsh_dt,
+    &tsh_dt,
     //&tsh_ud,
     &tsh_help,
     &tsh_exit
@@ -92,6 +94,17 @@ int tsh_help(char **args)
 int tsh_exit(char **args)
 {
     return 0;
+}
+
+int tsh_dt (char **args)
+{
+    char buff[100];
+    time_t now = time (0);
+    printf("%s\n", time_t);
+    strftime (buff, 100, "%Y%m%d%H%M%S", localtime (&now));
+    printf ("%s\n", buff);
+    return 1;
+    
 }
 
 
