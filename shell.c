@@ -18,6 +18,8 @@ Date: 19th October 2015
 #include <libgen.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <pwd.h>
+#include <errno.h>
 
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
@@ -25,14 +27,15 @@ Date: 19th October 2015
 #define TSH_TOK_DELIM "\t\r\n\a"
 
 
-//Function declarations for internal commands 
+//Function declarations for commands 
 int tsh_cd(char **args);
 int tsh_dt(char **args);
 int tsh_ud(char **args);
 int tsh_help(char **args);
 int tsh_exit(char **args);
+int tsh_ifc(char **args);
 
-//List the internal commands, 
+//List the commands, 
 //followed by a list of the functions to go with those commands.
 char *builtin_str[] = 
 {
@@ -40,7 +43,8 @@ char *builtin_str[] =
     "dt",
     "ud",
     "help",
-    "exit"
+    "exit",
+    "ifc"
 };
 
 int (*builtin_func[]) (char **) = 
@@ -49,7 +53,8 @@ int (*builtin_func[]) (char **) =
     &tsh_dt,
     &tsh_ud,
     &tsh_help,
-    &tsh_exit
+    &tsh_exit,
+    &tsh_ifc
 };
 
 int tsh_num_builtins() 
@@ -147,7 +152,7 @@ int tsh_help(char **args)
     int i;
     printf("Laura McGovern's custom shell \n");
     printf("Type program names and arguments, and hit enter.\n");
-    printf("The following are built in:\n");
+    printf("The following are executable:\n");
 
     for (i = 0; i < tsh_num_builtins(); i++) 
     {
@@ -163,6 +168,37 @@ int tsh_help(char **args)
 int tsh_exit(char **args)
 {
     return 0;
+}
+
+//External command functions
+
+//ifc function
+int tsh_ifc(char **args)
+{
+    char * lo = "lo";
+    
+    FILE *fp;
+  	char returnData[64];
+  	if (args[1] == NULL){
+  		fp = popen("/sbin/ifconfig eth1", "r");
+  	}
+    //The command tail arguments wouldn't work for me here,
+    //no compile errors but "no such file or directory".
+  	/*else if(strcmp(args[1],"eth1")== 0 ){
+  		fp = popen("/sbin/ifconfig eth1", "r");
+  	}
+  	else if (strcmp(args[1],"lo")== 0 ){
+  		fp = popen("/sbin/ifconfig lo", "r");
+  	}*/
+  	else{
+  		printf("Error in Syntax \n");
+ 		return 1;
+  	}
+  	while(fgets(returnData,64,fp) !=NULL){
+  		printf("%s",returnData);
+  	}
+  	pclose(fp);
+   	return 1;
 }
 
 
@@ -317,7 +353,10 @@ void tsh_loop(void)
 
     do 
     {
-        printf("usr@customshell: "); 
+        char *usrnm;
+        usrnm=(char *)malloc(10*sizeof(char));
+        usrnm=getlogin();
+        printf("%s@customshell: ", usrnm); 
         line = tsh_readline(); //Calls function to read the line
         args = tsh_splitline(line); //Calls function to split line into arguments
         status = tsh_execute(args); //Execute arguements 
