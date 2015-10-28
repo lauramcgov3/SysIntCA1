@@ -15,6 +15,9 @@ Date: 19th October 2015
 #include <unistd.h>
 #include <grp.h>
 #include <sys/types.h>
+#include <libgen.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
@@ -104,7 +107,7 @@ int tsh_ud (char **args)
     usrnm=getlogin();
     
     //Get group name
-    char* name;
+    char* grpname;
 	struct group* g;
     char** p;
 
@@ -112,13 +115,27 @@ int tsh_ud (char **args)
       fprintf( stderr, "getgrgid: NULL pointer\n" );
       return( EXIT_FAILURE );
     }
-    name = g->gr_name;
+    grpname = g->gr_name;
     for( p = g->gr_mem; *p != NULL; p++ ) {
       printf( "\t%s\n", *p );
     }
     
+    //get iNode
+    DIR *dir;
+    struct dirent *dp;
+    int inode;
+    if((dir = opendir("/home")) == NULL){
+        printf ("Cannot open /home");
+        exit(1);  
+    }
+    if ((dp = readdir(dir)) != NULL) {
+        inode = dp->d_ino;
+    }
+    closedir(dir);
+    
+    
     //Print everything
-    printf("%i, %i, %s, %s. \n", uid, gid, usrnm, name);
+    printf("%i, %i, %s, %s, %i. \n", uid, gid, usrnm, grpname, inode);
 	
 	return 1;
 }
