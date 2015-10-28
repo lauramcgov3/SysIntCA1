@@ -34,6 +34,7 @@ int tsh_ud(char **args);
 int tsh_help(char **args);
 int tsh_exit(char **args);
 int tsh_ifc(char **args);
+int tsh_pw(char **args);
 
 //List the commands, 
 //followed by a list of the functions to go with those commands.
@@ -44,7 +45,8 @@ char *builtin_str[] =
     "ud",
     "help",
     "exit",
-    "ifc"
+    "ifc",
+    "pw"
 };
 
 int (*builtin_func[]) (char **) = 
@@ -54,7 +56,8 @@ int (*builtin_func[]) (char **) =
     &tsh_ud,
     &tsh_help,
     &tsh_exit,
-    &tsh_ifc
+    &tsh_ifc,
+    &tsh_pw
 };
 
 int tsh_num_builtins() 
@@ -175,32 +178,47 @@ int tsh_exit(char **args)
 //ifc function
 int tsh_ifc(char **args)
 {
-    char * lo = "lo";
-    
     FILE *fp;
-  	char returnData[64];
-  	if (args[1] == NULL){
-  		fp = popen("/sbin/ifconfig eth1", "r");
-  	}
-    //The command tail arguments wouldn't work for me here,
-    //no compile errors but "no such file or directory".
-  	/*else if(strcmp(args[1],"eth1")== 0 ){
-  		fp = popen("/sbin/ifconfig eth1", "r");
-  	}
-  	else if (strcmp(args[1],"lo")== 0 ){
-  		fp = popen("/sbin/ifconfig lo", "r");
-  	}*/
-  	else{
-  		printf("Error in Syntax \n");
- 		return 1;
-  	}
-  	while(fgets(returnData,64,fp) !=NULL){
-  		printf("%s",returnData);
-  	}
-  	pclose(fp);
-   	return 1;
+  char returnData[64];
+  if (args[1] == NULL)
+  {
+	fp = popen("/sbin/ifconfig eth0","r");
+  }
+  else if(strcmp(args[1],"eth1")== 0 )
+  {
+	fp = popen("/sbin/ifconfig eth1","r");
+  }
+  else if (strcmp(args[1],"lo")== 0 )
+  {
+    fp = popen("/sbin/ifconfig lo","r");
+  }
+  else{
+	printf("Error in Syntax \n");
+	return 1;
+  }
+
+  while(fgets(returnData,64,fp) !=NULL){
+ 	printf("%s",returnData);
+  }
+  pclose(fp);
+  return 1;
 }
 
+//pw function
+tsh_pw(char **args)
+{
+    char cwd[1024];
+    
+    if(getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        fprintf(stdout, "The current directory: %s \n", cwd);
+    }
+    else
+    {
+        perror("getcwd() error");
+    }
+    return 1;
+}
 
 //Function to launch shell processes
 int tsh_launch(char **args)
