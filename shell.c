@@ -24,7 +24,7 @@ Date: 19th October 2015
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
 #define TSH_TOK_BUFFSIZE 64
-#define TSH_TOK_DELIM "\t\r\n\a"
+//#define TSH_TOK_DELIM "\t\r\n\a"
 
 
 //Function declarations for commands 
@@ -328,6 +328,7 @@ char **tsh_splitline (char *line)
 
     int buffsize = TSH_TOK_BUFFSIZE, position = 0;
     char **tokens = malloc(buffsize * sizeof(char*));
+    const char s[2] = " ";
     char *token;
 
     if (!tokens) 
@@ -337,7 +338,7 @@ char **tsh_splitline (char *line)
     }
 
     //Tokenize the string using whitespace as delimiters (strtok library)
-    token = strtok(line, TSH_TOK_DELIM);
+    token = strtok(line, s);
     while (token != NULL) 
     {
         tokens[position] = token;
@@ -354,7 +355,7 @@ char **tsh_splitline (char *line)
             }
         }
 
-        token = strtok(NULL, TSH_TOK_DELIM);
+        token = strtok(NULL, s);
     }
     tokens[position] = NULL;
     return tokens;
@@ -364,7 +365,7 @@ char **tsh_splitline (char *line)
 //tsh_loop to call functions to read, parse and execute command
 void tsh_loop(void)
 {
-
+    
     char *line;
     char **args;
     int status;
@@ -386,6 +387,33 @@ void tsh_loop(void)
     while(status); // Checking status variable
 }
 
+int info ()
+{
+    {
+        // We assume argv[1] is a filename to open
+        FILE *file = fopen( "info.txt", "r" );
+
+        /* fopen returns 0, the NULL pointer, on failure */
+        if ( file == 0 )
+        {
+            printf( "Could not open file\n" );
+        }
+        else
+        {
+            int x;
+            /* Read one character at a time from file, stopping at EOF, which
+               indicates the end of the file. Note that the idiom of "assign
+               to a variable, check the value" used below works because
+               the assignment statement evaluates to the value assigned. */
+            while  ( ( x = fgetc( file ) ) != EOF )
+            {
+                printf( "%c", x );
+            }
+            fclose( file );
+        }
+    }
+    return 1;
+}
 
 //Main loop
 int main(int argc, char **argv)
@@ -393,6 +421,7 @@ int main(int argc, char **argv)
     //Load config files here
 
     //Run main command loop
+    info();
     tsh_loop();
 
     //Shutdown/cleanup.
