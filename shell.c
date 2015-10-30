@@ -2,7 +2,8 @@
 
 Author: Laura McGovern, C12431378
 Assignment: Systems Integration, Assignment 1
-Date: 19th October 2015
+Date: 26th October 2015
+GitHub: https://github.com/lauramcgov3/SysIntCA1
 
 */
 
@@ -24,7 +25,6 @@ Date: 19th October 2015
 //Global declarations
 #define TSH_RL_BUFFSIZE 1024 //Buffer size for reading a line
 #define TSH_TOK_BUFFSIZE 64
-//#define TSH_TOK_DELIM "\t\r\n\a"
 
 
 //Function declarations for commands 
@@ -68,6 +68,11 @@ int tsh_num_builtins()
 
 //Internal command implementation
 
+/**
+   Brief: Bultin command: change directory.
+   Parameters: args List of args.  args[0] is "cd".  args[1] is the directory.
+   @return Always returns 1, to continue executing.
+ */
 
 //cd function
 int tsh_cd(char **args)
