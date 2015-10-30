@@ -17,6 +17,3 @@ No piping or redirection.
 Internal commands are: cd, ls, help, exit, dt (date) and ud (user data), clear, more, less.
 External commands are: pwd (pd), ifconfig (ifc).
 ifc can be used with the following tails: lo, eth1, wlan1.
-
-
-https://github.com/lauramcgov3/SysIntCA1
