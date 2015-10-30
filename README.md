@@ -10,5 +10,6 @@ No quoting arguments or escaping whitespace.
 No piping or redirection.
 Internal commands are: cd, help, exit, dt (date) and ud (user data).
 External commands are: pwd (pd), ifconfig (ifc).
+ifc can be used with the following tails: lo, eth1, wlan1.
 
 

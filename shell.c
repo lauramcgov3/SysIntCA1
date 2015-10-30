@@ -192,6 +192,10 @@ int tsh_ifc(char **args)
   {
     fp = popen("/sbin/ifconfig lo","r");
   }
+else if (strcmp(args[1],"wlan1")== 0 )
+  {
+    fp = popen("/sbin/ifconfig wlan1","r");
+  }
   else{
 	printf("Error in Syntax \n");
 	return 1;
@@ -390,6 +394,7 @@ void tsh_loop(void)
 int info ()
 {
     {
+        printf("\n\n");
         // We assume argv[1] is a filename to open
         FILE *file = fopen( "info.txt", "r" );
 
