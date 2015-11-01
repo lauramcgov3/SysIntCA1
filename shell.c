@@ -31,10 +31,14 @@ GitHub: https://github.com/lauramcgov3/SysIntCA1
 int tsh_cd(char **args);
 int tsh_dt(char **args);
 int tsh_ud(char **args);
+int tsh_ls(char **args);
 int tsh_help(char **args);
+int tsh_clear(char **args);
 int tsh_exit(char **args);
 int tsh_ifc(char **args);
 int tsh_pw(char **args);
+int tsh_mkd(char **args);
+int tsh_rmd(char **args);
 
 //List the commands, 
 //followed by a list of the functions to go with those commands.
@@ -43,8 +47,12 @@ char *builtin_str[] =
     "cd",
     "dt",
     "ud",
+    "ls",
     "help",
+    "clear",
     "exit",
+    "mkd",
+    "rmd",
     "ifc",
     "pw"
 };
@@ -54,10 +62,14 @@ int (*builtin_func[]) (char **) =
     &tsh_cd,
     &tsh_dt,
     &tsh_ud,
+    &tsh_ls,
     &tsh_help,
+    &tsh_clear,
     &tsh_exit,
+    &tsh_mkd,
+    &tsh_rmd,
     &tsh_ifc,
-    &tsh_pw
+    &tsh_pw,
 };
 
 int tsh_num_builtins() 
@@ -68,11 +80,6 @@ int tsh_num_builtins()
 
 //Internal command implementation
 
-/**
-   Brief: Bultin command: change directory.
-   Parameters: args List of args.  args[0] is "cd".  args[1] is the directory.
-   @return Always returns 1, to continue executing.
- */
 
 //cd function
 int tsh_cd(char **args)
@@ -103,6 +110,23 @@ int tsh_dt (char **args)
     
 }
 
+int tsh_ls (char **args)
+{
+    FILE *fptr;
+    char line[130]; /* line from unix command*/
+
+    fptr = popen("ls", "r"); /* Issue the ls command. */
+
+    /* Read a line */
+    while ( fgets( line, sizeof line, fptr))
+    {
+    printf("%s", line);
+
+    /* or process the 'line' as needed */
+    }
+    pclose(fptr);
+    return 1;
+}
 
 //ud function
 int tsh_ud (char **args)
@@ -171,11 +195,144 @@ int tsh_help(char **args)
     return 1;
 }
 
+//clear function
+int tsh_clear(char **args)
+{
+    if (strcmp(args[0], "clear") ==0)
+    {
+        system("clear");
+    }
+    else
+    {
+        printf("Command not recognised. \n");
+    }
+    //free(args[0]);
+    return 1;
+}
 
 //Exit function
 int tsh_exit(char **args)
 {
     return 0;
+}
+
+//mkd function
+int tsh_mkd(char **args)
+{
+    
+    
+    //Get the name of the new directory
+    char *dir;
+    dir = args[1];
+    //printf("%s \n", dir);
+    
+    //Get current working directory
+    char path[1024];
+    getcwd(path, sizeof(path));
+    //printf("%s \n", path);
+    
+    //Combine path with new directory to get path
+    strcat(path, dir);
+    //printf("%s \n", path);
+    
+    struct stat st = {0};
+
+    if (stat(path, &st) == -1) 
+    {
+        printf("%s created.\n", path);
+        mkdir(path, 0755);   
+    }
+    else
+    {
+        printf("This directory already exists. \n");
+    }
+    
+    return 1;
+    
+}
+
+//rmd function
+int tsh_rmd(char **args)
+{
+
+    char *dpath;
+    
+    //Get the name of the directory to delete
+    char *dir;
+    dir = args[1];
+    printf("%s \n", dir);
+    
+    //Get current working directory
+    char path[1024];
+    getcwd(path, sizeof(path));
+    printf("%s \n", path);
+    
+    //Combine path with new directory to get path
+    strcat(path, dir);
+    printf("%s \n", path);
+    
+    dpath = path;
+
+    DIR *d = opendir(path);
+    size_t path_len = strlen(path);
+    int r = -1;
+
+    if (d)
+    {
+      struct dirent *p;
+
+      r = 0;
+
+      while (!r && (p=readdir(d)))
+      {
+          int r2 = -1;
+          char *buf;
+          size_t len;
+
+          /* Skip the names "." and ".." as we don't want to recurse on them. */
+          if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, ".."))
+          {
+             continue;
+          }
+
+          len = path_len + strlen(p->d_name) + 2; 
+          buf = malloc(len);
+
+          if (buf)
+          {
+             struct stat statbuf;
+
+             snprintf(buf, len, "%s/%s", path, p->d_name);
+
+             if (!stat(buf, &statbuf))
+             {
+                if (S_ISDIR(statbuf.st_mode))
+                {
+                   r2 = rmdir(buf);
+                }
+                else
+                {
+                   r2 = unlink(buf);
+                }
+             }
+
+             free(buf);
+          }
+
+          r = r2;
+      }
+
+      closedir(d);
+    }
+
+    if (!r)
+    {
+      printf("%s removed \n", dpath);
+      r = rmdir(dpath);
+
+    }
+
+   return 1;
 }
 
 //External command functions
@@ -214,7 +371,7 @@ else if (strcmp(args[1],"wlan1")== 0 )
 }
 
 //pw function
-tsh_pw(char **args)
+int tsh_pw(char **args)
 {
     char cwd[1024];
     
@@ -381,6 +538,7 @@ void tsh_loop(void)
 
     do 
     {
+        //Get current username
         char *usrnm;
         usrnm=(char *)malloc(10*sizeof(char));
         usrnm=getlogin();
@@ -400,13 +558,12 @@ int info ()
 {
     {
         printf("\n\n");
-        // We assume argv[1] is a filename to open
         FILE *file = fopen( "info.txt", "r" );
 
         /* fopen returns 0, the NULL pointer, on failure */
         if ( file == 0 )
         {
-            printf( "Could not open file\n" );
+            printf( "Could not open file.\n" );
         }
         else
         {
